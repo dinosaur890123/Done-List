@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Web Page</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <div class="app-container">
+        <h1>Welcome to My Web Page</h1>
+        <p>This is a simple web page to demonstrate HTML structure.</p>
+    <header class="app-header">
+        <div class="title-container">
+            <h1>What I have completed today</h1>
+            <p>Place your completed items below!</p>
+        </div>
+        <div class="form-container">
+            <input type="text" id="taskInput" placeholder="I finished my math homework...">
+            <button id="addButton">Add</button>
+        </div>
+        <main class="main-scroll-area">
+            <div class="main-content">
+            <ul id="doneList">
+                // empty for now, updated by user
+            </ul>
+            <div id="emptyState" class="hidden">
+                <p>Your list is empty. Go get something done before you put it here</p>
+
+            </div>
+            </div>
+        </main>
+        <script>
+            const taskInput = document.getElementById('taskInput');
+            const addButton = document.getElementById('addButton');
+            const doneList = document.getElementById('doneList');
+            const emptyState = document.getElementById('emptyState');
+            let items = JSON.parse(localStorage.getItem('doneItems')) || []; // Local storage loding
+            
+        </script>
+
+
+    </header>
+
+</html>
