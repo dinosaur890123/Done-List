@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Done list</title>
+    <title>Done list - Stop procrastinating and do something!</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <header class ="app-header">
@@ -21,6 +21,9 @@
                 <p>Place your completed items below!</p>
             </div>
             <div id="quoteContainer" class="quote-container"></div>
+            <div class="streak-counter">
+                🔥<span id="streakCount">0</span> Day streak.
+            </div>
             <div class="form-container">
                 <input type="text" id="taskInput" placeholder="I finished my math homework...">
                 <button id="addButton">Add</button>
@@ -31,12 +34,11 @@
                 <ul id="doneList">
                 </ul>
                 <div id="emptyState" class="hidden">
-                    <p>Your list is empty. Go get something done before you put it here.</p>
+                    <p>Your list is empty. Go get something done before you put it here. You better not be procrastinating.</p>
                 </div>
             </div>
         </main>
     </div>
-
     <script>
         const quoteContainer = document.getElementById('quoteContainer');
         const taskInput = document.getElementById('taskInput');
@@ -57,7 +59,6 @@
             const randomIndex = Math.floor(Math.random() * quotes.length);
             quoteContainer.textContent = `"${quotes[randomIndex]}"`;
         }
-
         function renderItems() {
             doneList.innerHTML = '';
             if (items.length === 0) {

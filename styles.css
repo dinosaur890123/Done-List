@@ -8,3 +8,11 @@ body {
     align-items: center;
     height: 100vh;
 }
+.streak-counter {
+    display:flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f97316;
+}
