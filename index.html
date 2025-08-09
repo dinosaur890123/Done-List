@@ -2,42 +2,163 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My Web Page</title>
+    <title>Done list</title>
     <link rel="stylesheet" href="styles.css">
-    
+</head>
+<header class ="app-header">
+    <div class="app-header-container">
+        <h1>Today</h1>
+        <p>Place your completed items below!</p>
+    </div>
+    <div id="weeklySummary" class="weekly-summary"></div>
+    <div id="quoteContainer" class="quote-container"></div>
+</header>
+<body>
     <div class="app-container">
-    <header class="app-header">
-        <div class="title-container">
-            <h1>What I have completed today</h1>
-            <p>Place your completed items below!</p>
-        </div>
-        <div class="form-container">
-            <input type="text" id="taskInput" placeholder="I finished my math homework...">
-            <button id="addButton">Add</button>
-        </div>
+        <header class="app-header">
+            <div class="title-container">
+                <h1>Today</h1>
+                <p>Place your completed items below!</p>
+            </div>
+            <div id="quoteContainer" class="quote-container"></div>
+            <div class="form-container">
+                <input type="text" id="taskInput" placeholder="I finished my math homework...">
+                <button id="addButton">Add</button>
+            </div>
+        </header>
         <main class="main-scroll-area">
             <div class="main-content">
-            <ul id="doneList">
-            
-            </ul>
-            <div id="emptyState" class="hidden">
-                <p>Your list is empty. Go get something done before you put it here</p>
-
-            </div>
+                <ul id="doneList">
+                </ul>
+                <div id="emptyState" class="hidden">
+                    <p>Your list is empty. Go get something done before you put it here.</p>
+                </div>
             </div>
         </main>
-        <script>
-            const taskInput = document.getElementById('taskInput');
-            const addButton = document.getElementById('addButton');
-            const doneList = document.getElementById('doneList');
-            const emptyState = document.getElementById('emptyState');
-            let items = JSON.parse(localStorage.getItem('doneItems')) || []; // Local storage loading
+    </div>
 
+    <script>
+        const quoteContainer = document.getElementById('quoteContainer');
+        const taskInput = document.getElementById('taskInput');
+        const addButton = document.getElementById('addButton');
+        const doneList = document.getElementById('doneList');
+        const emptyState = document.getElementById('emptyState');
 
+        const quotes = [
+            "The secret of getting ahead is getting started.",
+            "Success is the sum of small things you do, repeated continously.",
+            "The future depends on what you do today.",
+            "Believe you can and you're halfway there.",
+            "You are never too old to set another goal or to dream a new dream.",
+        ];
 
-        </script>
+        let items = JSON.parse(localStorage.getItem('doneItems')) || [];
+        function showRandomQuote() {
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            quoteContainer.textContent = `"${quotes[randomIndex]}"`;
+        }
 
+        function renderItems() {
+            doneList.innerHTML = '';
+            if (items.length === 0) {
+                emptyState.style.display = 'block';
+                doneList.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                doneList.style.display = 'block';
+            }
+            items.forEach((itemText, index) => {
+                const li = document.createElement('li');
+                li.className = 'done-item';
+                li.dataset.index = index;
+                li.innerHTML = `
+                    <span class="item-text">${itemText}</span>
+                    <button class="remove-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                `;
+                doneList.prepend(li);
+            });
+        }
 
-    </header>
+        function addItem() {
+            const text = taskInput.value.trim();
+            if (text) {
+                items.push(text);
+                taskInput.value = '';
+                localStorage.setItem('doneItems', JSON.stringify(items));
+                renderItems();
+            }
+        }
 
-</html>
+        function removeItem(indexToRemove) {
+            items.splice(indexToRemove, 1);
+            localStorage.setItem('doneItems', JSON.stringify(items));
+            renderItems();
+        }
+
+        addButton.addEventListener('click', addItem);
+
+        taskInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                addItem();
+            }
+        });
+
+        doneList.addEventListener('click', function(event) {
+            const removeButton = event.target.closest('.remove-btn');
+            if (removeButton) {
+                const itemElement = removeButton.closest('.done-item');
+                const visualIndex = Array.from(doneList.children).indexOf(itemElement);
+                const actualIndex = items.length - 1 - visualIndex;
+                removeItem(actualIndex);
+            }
+        });
+        // this is just here so i know where the weekly stuff is held, seperate to others
+        const weeklySummary = document.getElementById('weeklySummary');
+        function getWeekStartDate() {
+            const today = new Date();
+            const day = today.getDay();
+            const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Adjust if Sunday
+            return new Date(today.setDate(diff));
+        }
+        function getWeeklyCount() {
+            const now = new Date();
+            const weekStart = getWeekStartDate(now);
+            let count = 0;
+            count = items.length;
+            return count;
+        }
+        function renderWeeklySummary() {
+            const count = getWeeklyCount();
+            weeklySummary.textContent = `You have completed ${count} items this week.`;
+        }
+        function renderItems() {
+            donelist.innerHTML = '';
+            if (items.length === 0) {
+                emptyState.style.display = 'block';
+                doneList.style.display = 'none';
+            } else {
+                emptyState.style.display = 'none'; 
+                doneList.style.display = 'block';
+            }
+            items.forEach((itemText, index) => {
+                const li = document.createElement('li');
+                li.classname = 'done-item';
+
+                li.dataset.index = index;
+                li.innerHTML = `
+                    <span class="item-text">${itemText}</span>
+                    <button class="remove-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                `;
+                doneList.prepend(li);
+            
+            });
+            renderWeeklySummary();
+        }
+
+        showRandomQuote();
+        renderItems();
+    </script>
