@@ -68,13 +68,6 @@
             const randomIndex = Math.floor(Math.random() * quotes.length);
             quoteContainer.textContent = `"${quotes[randomIndex]}"`;
         }
-        function updateStreak() {
-            const todayStr = getTodayDateString();
-            const lastDateStr = appData.streak.lastTaskDate;
-            if (!lastDateStr) {
-                appData.streak.count = 1;
-            }
-        }
         function getWeekStartDate() {
             const today = new Date();
             const day = today.getDay();
