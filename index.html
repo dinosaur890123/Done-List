@@ -24,6 +24,12 @@
             <div class="streak-counter">
                 🔥<span id="streakCount">0</span> Day streak.
             </div>
+            <div class="weekly-summary" id="weekly-summary">
+
+            </div>
+            <div id="totalTasks" class="total-tasks">
+            
+            </div>
             <div class="form-container">
                 <input type="text" id="taskInput" placeholder="I finished my math homework...">
                 <button id="addButton">Add</button>
@@ -50,7 +56,7 @@
             "The secret of getting ahead is getting started.",
             "Success is the sum of small things you do, repeated continously.",
             "The future depends on what you do today.",
-            "Believe you can and you're halfway there.",
+            "Believe you can and you're already halfway there.",
             "You are never too old to set another goal or to dream a new dream.",
         ];
 
@@ -59,6 +65,26 @@
             const randomIndex = Math.floor(Math.random() * quotes.length);
             quoteContainer.textContent = `"${quotes[randomIndex]}"`;
         }
+        function getWeekStartDate() {
+            const today = new Date();
+            const day = today.getDay();
+            const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(today.setDate(diff));
+        }
+        function getWeeklyCount() {
+            return items.length;
+        }
+        function renderWeeklySummary() {
+            const count = getWeeklyCount();
+        }
+        function renderTotalTasks() {
+            const total = items.length;
+            if (total===1) {
+                totalTasks.textContent = 'You have completed 1 task, you better get going';
+            } else {
+                totalTasks.textContent = "You have completed ${total} overall. Hopefully you aren't procrastinating.";
+            }
+            }
         function renderItems() {
             doneList.innerHTML = '';
             if (items.length === 0) {
@@ -105,7 +131,6 @@
                 addItem();
             }
         });
-
         doneList.addEventListener('click', function(event) {
             const removeButton = event.target.closest('.remove-btn');
             if (removeButton) {

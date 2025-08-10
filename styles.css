@@ -8,6 +8,23 @@ body {
     align-items: center;
     height: 100vh;
 }
+.app-header {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.title-container h1 {
+    font-size: 2.5rem;
+    margin-bottom:0.5rem;
+}
+.title-container p {
+    margin-top: 0;
+    color: #6b7280;
+}
+.quote-container {
+    font-size: italic;
+    margin: 1rem 0;
+}
 .streak-counter {
     display:flex;
     align-items: center;
@@ -16,3 +33,88 @@ body {
     font-weight: 600;
     color: #f97316;
 }
+.weekly-summary {
+    font-size: 0.9rem;
+    color: #374151;
+    margin-bottom: 1.5rem;
+}
+.total-tasks {
+    font-size: 0.9rem;
+    color: #374151;
+    margin-bottom: 1.5rem;
+}
+.form-container {
+    display:flex;
+    gap:0.5rem;
+    width: 100%;
+}
+#taskInput {
+    flex-grow: 1;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+}
+#addButton {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    color: white;
+    background-color: #2563eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+#addButton:hover {
+    background-color: #1d43d8;
+}
+.main-scroll-area {
+    width: 100%;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+#doneList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.done-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: white;
+    padding: 1rem;
+    border: 1px solid #dbd6d6;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+.item-text {
+    flex-grow: 1;
+}
+.remove-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    padding: 0.25rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+.remove-btn:hover {
+    background-color: #f3f4f6;
+    color: red;
+}
+#emptyState {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+}
+.hidden {
+    display:none;
+}
+
