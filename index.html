@@ -5,14 +5,6 @@
     <title>Done list - Stop procrastinating and do something!</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<header class ="app-header">
-    <div class="app-header-container">
-        <h1>Today</h1>
-        <p>Place your completed items below!</p>
-    </div>
-    <div id="weeklySummary" class="weekly-summary"></div>
-    <div id="quoteContainer" class="quote-container"></div>
-</header>
 <body>
     <div class="app-container">
         <header class="app-header">
@@ -144,7 +136,6 @@
             }
         });
         // this is just here so i know where the weekly stuff is held, seperate to others
-        const weeklySummary = document.getElementById('weeklySummary');
         function getWeekStartDate() {
             const today = new Date();
             const day = today.getDay();
@@ -173,7 +164,7 @@
             }
             items.forEach((itemText, index) => {
                 const li = document.createElement('li');
-                li.classname = 'done-item';
+                li.className = 'done-item';
 
                 li.dataset.index = index;
                 li.innerHTML = `
