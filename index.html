@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Done list - Stop procrastinating and do something!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Done List - Stop procrastinating and do something!</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,14 +15,10 @@
             </div>
             <div id="quoteContainer" class="quote-container"></div>
             <div class="streak-counter">
-                🔥<span id="streakCount">0</span> Day streak.
+                🔥 <span id="streakCount">0</span> Day Streak
             </div>
-            <div class="weekly-summary" id="weekly-summary">
-
-            </div>
-            <div id="totalTasks" class="total-tasks">
-            
-            </div>
+            <div id="weeklySummary" class="weekly-summary"></div>
+            <div id="totalTasks" class="total-tasks"></div>
             <div class="form-container">
                 <input type="text" id="taskInput" placeholder="I finished my math homework...">
                 <button id="addButton">Add</button>
@@ -30,13 +27,18 @@
         <main class="main-scroll-area">
             <div class="main-content">
                 <ul id="doneList">
+                    <!-- Done items will be added here by JavaScript -->
                 </ul>
-                <div id="emptyState" class="hidden">
-                    <p>Your list is empty. Go get something done before you put it here. You better not be procrastinating.</p>
+                <div id="emptyState">
+                    <p>Your list is empty. Go get something done!</p>
                 </div>
             </div>
         </main>
     </div>
+<div id="toast-notification" class="toast-hidden">
+
+</div>
+
     <script>
         const quoteContainer = document.getElementById('quoteContainer');
         const taskInput = document.getElementById('taskInput');
@@ -49,74 +51,136 @@
 
         const quotes = [
             "The secret of getting ahead is getting started.",
-            "Success is the sum of small things you do, repeated continously.",
+            "Success is the sum of small things you do, repeated continuously.",
             "The future depends on what you do today.",
             "Believe you can and you're already halfway there.",
             "You are never too old to set another goal or to dream a new dream.",
         ];
 
         let items = JSON.parse(localStorage.getItem('doneItems')) || [];
+        let streakData = JSON.parse(localStorage.getItem('streakData')) || { count: 0, lastDate: null };
+
+        function saveData() {
+            localStorage.setItem('doneItems', JSON.stringify(items));
+            localStorage.setItem('streakData', JSON.stringify(streakData));
+        }
+
+        function updateUI() {
+            renderItems();
+            renderTotalTasks();
+            renderWeeklySummary();
+            renderStreak();
+            emptyState.classList.toggle('hidden', items.length > 0);
+            doneList.classList.toggle('hidden', items.length === 0);
+        }
+
         function showRandomQuote() {
             const randomIndex = Math.floor(Math.random() * quotes.length);
             quoteContainer.textContent = `"${quotes[randomIndex]}"`;
         }
-        function getWeekStartDate() {
-            const today = new Date();
-            const day = today.getDay();
-            const diff = today.getDate() - day + (day === 0 ? -6 : 1);
-            return new Date(today.setDate(diff));
-        }
-        function getWeeklyCount() {
-            return items.length;
-        }
-        function renderWeeklySummary() {
-            const count = getWeeklyCount();
-        }
-        function renderTotalTasks() {
-            const total = items.length;
-            if (total===1) {
-                totalTasks.textContent = 'You have completed 1 task, you better get going';
-            } else {
-                totalTasks.textContent = "You have completed ${total} overall. Hopefully you aren't procrastinating.";
-            }
-            }
+
         function renderItems() {
             doneList.innerHTML = '';
-            if (items.length === 0) {
-                emptyState.style.display = 'block';
-                doneList.style.display = 'none';
-            } else {
-                emptyState.style.display = 'none';
-                doneList.style.display = 'block';
-            }
-            items.forEach((itemText, index) => {
+            items.forEach((item, index) => {
                 const li = document.createElement('li');
                 li.className = 'done-item';
                 li.dataset.index = index;
+
                 li.innerHTML = `
-                    <span class="item-text">${itemText}</span>
-                    <button class="remove-btn">
+                    <span class="item-text">${item.text}</span>
+                    <button class="remove-btn" aria-label="Remove item">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 `;
-                doneList.prepend(li);
+                doneList.appendChild(li);
             });
         }
+
+        function renderTotalTasks() {
+            const total = items.length;
+            if (total === 1) {
+                totalTasks.textContent = 'You have completed 1 task overall. Keep it up!';
+            } else {
+                totalTasks.textContent = `You have completed ${total} tasks overall. Great work!`;
+            }
+        }
+        
+        function renderWeeklySummary() {
+            const today = new Date();
+            const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)));
+            startOfWeek.setHours(0, 0, 0, 0);
+
+            const weeklyCount = items.filter(item => {
+                const itemDate = new Date(item.date);
+                return itemDate >= startOfWeek;
+            }).length;
+
+            weeklySummary.textContent = `You have completed ${weeklyCount} items this week.`;
+        }
+        
+        function updateStreak() {
+            const today = new Date();
+            const todayStr = today.toDateString();
+
+            if (streakData.lastDate !== todayStr) {
+                const yesterday = new Date();
+                yesterday.setDate(today.getDate() - 1);
+                const yesterdayStr = yesterday.toDateString();
+
+                if (streakData.lastDate === yesterdayStr) {
+                    streakData.count++;
+                } else {
+                    streakData.count = 1;
+                }
+                streakData.lastDate = todayStr;
+            }
+        }
+
+        function renderStreak() {
+            streakCountEl.textContent = streakData.count;
+        }
+        function showToast(message) {
+            toastNotification.textContent = message;
+            toastNotification.classList.remove('hidden');
+            toastNotification.classList.add('show');
+            setTimeout(()=> {
+                toastNotification.classList.remove('show')
+                toastNotification.classList.add('hidden')
+            }, 4000);
+        }
+        function checkAchievements() {
+            for (const id in achievements) {
+                if (!unlockedAchievements.includes(id)) {
+                    const achievement = achievements[id];
+                    if (achievement.condition(items, streakData)) {
+                        unlockedAchievements.push(id);
+                        showToast(`🏆 Achievement Unlocked: ${achievement.name}`);
+                    }
+                }
+            }
+        }
+
 
         function addItem() {
             const text = taskInput.value.trim();
             if (text) {
-                items.push(text);
+                const newItem = {
+                    text: text,
+                    date: new Date().toISOString()
+                };
+                items.push(newItem);
                 taskInput.value = '';
-                localStorage.setItem('doneItems', JSON.stringify(items));
-                renderItems();
+                
+                updateStreak();
+                saveData();
+                updateUI();
             }
         }
 
         function removeItem(indexToRemove) {
             items.splice(indexToRemove, 1);
-            localStorage.setItem('doneItems', JSON.stringify(items));
-            renderItems();
+            saveData();
+            updateUI();
         }
 
         addButton.addEventListener('click', addItem);
@@ -126,59 +190,19 @@
                 addItem();
             }
         });
+
         doneList.addEventListener('click', function(event) {
             const removeButton = event.target.closest('.remove-btn');
             if (removeButton) {
                 const itemElement = removeButton.closest('.done-item');
-                const visualIndex = Array.from(doneList.children).indexOf(itemElement);
-                const actualIndex = items.length - 1 - visualIndex;
-                removeItem(actualIndex);
+                const index = parseInt(itemElement.dataset.index, 10);
+                removeItem(index);
             }
         });
-        // this is just here so i know where the weekly stuff is held, seperate to others
-        function getWeekStartDate() {
-            const today = new Date();
-            const day = today.getDay();
-            const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Adjust if Sunday
-            return new Date(today.setDate(diff));
-        }
-        function getWeeklyCount() {
-            const now = new Date();
-            const weekStart = getWeekStartDate(now);
-            let count = 0;
-            count = items.length;
-            return count;
-        }
-        function renderWeeklySummary() {
-            const count = getWeeklyCount();
-            weeklySummary.textContent = `You have completed ${count} items this week.`;
-        }
-        function renderItems() {
-            donelist.innerHTML = '';
-            if (items.length === 0) {
-                emptyState.style.display = 'block';
-                doneList.style.display = 'none';
-            } else {
-                emptyState.style.display = 'none'; 
-                doneList.style.display = 'block';
-            }
-            items.forEach((itemText, index) => {
-                const li = document.createElement('li');
-                li.className = 'done-item';
-
-                li.dataset.index = index;
-                li.innerHTML = `
-                    <span class="item-text">${itemText}</span>
-                    <button class="remove-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                `;
-                doneList.prepend(li);
-            
-            });
-            renderWeeklySummary();
-        }
 
         showRandomQuote();
-        renderItems();
+        updateUI();
+
     </script>
+</body>
+</html>
