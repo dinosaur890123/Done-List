@@ -14,8 +14,12 @@
                 <p>Place your completed items below!</p>
             </div>
             <div id="quoteContainer" class="quote-container"></div>
-            <div class="streak-counter">
-                🔥 <span id="streakCount">0</span> Day Streak
+            <div class="stats-container">
+                <div class="streak-counter">
+                    🔥 <span id="streakCount">0</span> Day Streak
+                </div>
+                <div id="achievementsContainer" class="achievements-container">
+                </div>
             </div>
             <div id="weeklySummary" class="weekly-summary"></div>
             <div id="totalTasks" class="total-tasks"></div>
@@ -26,18 +30,15 @@
         </header>
         <main class="main-scroll-area">
             <div class="main-content">
-                <ul id="doneList">
-                    <!-- Done items will be added here by JavaScript -->
-                </ul>
+                <ul id="doneList"></ul>
                 <div id="emptyState">
                     <p>Your list is empty. Go get something done!</p>
                 </div>
             </div>
         </main>
     </div>
-<div id="toast-notification" class="toast-hidden">
 
-</div>
+    <div id="toastNotification" class="toast hidden"></div>
 
     <script>
         const quoteContainer = document.getElementById('quoteContainer');
@@ -48,6 +49,8 @@
         const weeklySummary = document.getElementById('weeklySummary');
         const totalTasks = document.getElementById('totalTasks');
         const streakCountEl = document.getElementById('streakCount');
+        const achievementsContainer = document.getElementById('achievementsContainer');
+        const toastNotification = document.getElementById('toastNotification');
 
         const quotes = [
             "The secret of getting ahead is getting started.",
@@ -57,12 +60,22 @@
             "You are never too old to set another goal or to dream a new dream.",
         ];
 
+        const achievements = {
+            first_task: { name: "First Step!", icon: "🎉", description: "You completed your first task!", condition: (items, streak) => items.length >= 1 },
+            five_tasks: { name: "Getting Started", icon: "👍", description: "You completed 5 tasks!", condition: (items, streak) => items.length >= 5 },
+            ten_tasks: { name: "Productive!", icon: "🚀", description: "You completed 10 tasks!", condition: (items, streak) => items.length >= 10 },
+            three_day_streak: { name: "On a Roll!", icon: "📈", description: "You have a 3-day streak!", condition: (items, streak) => streak.count >= 3 },
+            seven_day_streak: { name: "On Fire!", icon: "🔥", description: "You have a 7-day streak!", condition: (items, streak) => streak.count >= 7 },
+        };
+        
         let items = JSON.parse(localStorage.getItem('doneItems')) || [];
         let streakData = JSON.parse(localStorage.getItem('streakData')) || { count: 0, lastDate: null };
+        let unlockedAchievements = JSON.parse(localStorage.getItem('unlockedAchievements')) || [];
 
         function saveData() {
             localStorage.setItem('doneItems', JSON.stringify(items));
             localStorage.setItem('streakData', JSON.stringify(streakData));
+            localStorage.setItem('unlockedAchievements', JSON.stringify(unlockedAchievements));
         }
 
         function updateUI() {
@@ -70,6 +83,7 @@
             renderTotalTasks();
             renderWeeklySummary();
             renderStreak();
+            renderAchievements();
             emptyState.classList.toggle('hidden', items.length > 0);
             doneList.classList.toggle('hidden', items.length === 0);
         }
@@ -85,7 +99,6 @@
                 const li = document.createElement('li');
                 li.className = 'done-item';
                 li.dataset.index = index;
-
                 li.innerHTML = `
                     <span class="item-text">${item.text}</span>
                     <button class="remove-btn" aria-label="Remove item">
@@ -98,40 +111,25 @@
 
         function renderTotalTasks() {
             const total = items.length;
-            if (total === 1) {
-                totalTasks.textContent = 'You have completed 1 task overall. Keep it up!';
-            } else {
-                totalTasks.textContent = `You have completed ${total} tasks overall. Great work!`;
-            }
+            totalTasks.textContent = total === 1 ? 'You have completed 1 task overall. Keep it up!' : `You have completed ${total} tasks overall. Great work!`;
         }
         
         function renderWeeklySummary() {
             const today = new Date();
             const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)));
             startOfWeek.setHours(0, 0, 0, 0);
-
-            const weeklyCount = items.filter(item => {
-                const itemDate = new Date(item.date);
-                return itemDate >= startOfWeek;
-            }).length;
-
+            const weeklyCount = items.filter(item => new Date(item.date) >= startOfWeek).length;
             weeklySummary.textContent = `You have completed ${weeklyCount} items this week.`;
         }
         
         function updateStreak() {
             const today = new Date();
             const todayStr = today.toDateString();
-
             if (streakData.lastDate !== todayStr) {
                 const yesterday = new Date();
                 yesterday.setDate(today.getDate() - 1);
                 const yesterdayStr = yesterday.toDateString();
-
-                if (streakData.lastDate === yesterdayStr) {
-                    streakData.count++;
-                } else {
-                    streakData.count = 1;
-                }
+                streakData.count = streakData.lastDate === yesterdayStr ? streakData.count + 1 : 1;
                 streakData.lastDate = todayStr;
             }
         }
@@ -139,39 +137,50 @@
         function renderStreak() {
             streakCountEl.textContent = streakData.count;
         }
+
         function showToast(message) {
             toastNotification.textContent = message;
             toastNotification.classList.remove('hidden');
             toastNotification.classList.add('show');
-            setTimeout(()=> {
-                toastNotification.classList.remove('show')
-                toastNotification.classList.add('hidden')
+            setTimeout(() => {
+                toastNotification.classList.remove('show');
+                toastNotification.classList.add('hidden');
             }, 4000);
         }
+
         function checkAchievements() {
             for (const id in achievements) {
                 if (!unlockedAchievements.includes(id)) {
                     const achievement = achievements[id];
                     if (achievement.condition(items, streakData)) {
                         unlockedAchievements.push(id);
-                        showToast(`Achievement unlocked: ${achievement.name}`);
+                        showToast(`🏆 Achievement Unlocked: ${achievement.name}`);
                     }
                 }
             }
         }
 
+        function renderAchievements() {
+            achievementsContainer.innerHTML = '';
+            unlockedAchievements.forEach(id => {
+                const achievement = achievements[id];
+                if (achievement) {
+                    const badge = document.createElement('span');
+                    badge.className = 'achievement-badge';
+                    badge.textContent = achievement.icon;
+                    badge.setAttribute('data-tooltip', `${achievement.name} - ${achievement.description}`);
+                    achievementsContainer.appendChild(badge);
+                }
+            });
+        }
 
         function addItem() {
             const text = taskInput.value.trim();
             if (text) {
-                const newItem = {
-                    text: text,
-                    date: new Date().toISOString()
-                };
-                items.push(newItem);
+                items.push({ text: text, date: new Date().toISOString() });
                 taskInput.value = '';
-                
                 updateStreak();
+                checkAchievements();
                 saveData();
                 updateUI();
             }
@@ -184,25 +193,17 @@
         }
 
         addButton.addEventListener('click', addItem);
-
-        taskInput.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                addItem();
-            }
-        });
-
-        doneList.addEventListener('click', function(event) {
-            const removeButton = event.target.closest('.remove-btn');
+        taskInput.addEventListener('keypress', e => e.key === 'Enter' && addItem());
+        doneList.addEventListener('click', e => {
+            const removeButton = e.target.closest('.remove-btn');
             if (removeButton) {
                 const itemElement = removeButton.closest('.done-item');
-                const index = parseInt(itemElement.dataset.index, 10);
-                removeItem(index);
+                removeItem(parseInt(itemElement.dataset.index, 10));
             }
         });
 
         showRandomQuote();
         updateUI();
-
     </script>
 </body>
 </html>

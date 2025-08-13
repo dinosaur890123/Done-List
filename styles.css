@@ -1,15 +1,20 @@
 body {
     background-color: #f8fafc;
     color: #1f2937;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    margin: 0;
 }
 .app-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     height: 100vh;
+    padding: 1rem;
+    box-sizing: border-box;
 }
 .app-header {
     width: 100%;
+    max-width: 600px;
     text-align: center;
     margin-bottom: 2rem;
 }
@@ -22,31 +27,69 @@ body {
     color: #6b7280;
 }
 .quote-container {
-    font-size: italic;
+    font-style: italic;
     margin: 1rem 0;
+    color: #4b5563;
+}
+.stats-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
 }
 .streak-counter {
     display:flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: #f97316;
+    background-color: #fff7ed;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
 }
-.weekly-summary {
+.achievements-container {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+.achievement-badge {
+    font-size: 1.5rem;
+    cursor: pointer;
+    position: relative;
+}
+.achievement-badge::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1f2937;
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0.2s;
+    z-index: 10;
+}
+.achievement-badge:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+.weekly-summary, .total-tasks {
     font-size: 0.9rem;
     color: #374151;
-    margin-bottom: 1.5rem;
-}
-.total-tasks {
-    font-size: 0.9rem;
-    color: #374151;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 .form-container {
     display:flex;
     gap:0.5rem;
     width: 100%;
+    margin-top: 1rem;
 }
 #taskInput {
     flex-grow: 1;
@@ -71,6 +114,7 @@ body {
 }
 .main-scroll-area {
     width: 100%;
+    max-width: 600px;
     flex-grow: 1;
     overflow-y: auto;
 }
@@ -85,10 +129,15 @@ body {
     justify-content: space-between;
     background-color: white;
     padding: 1rem;
-    border: 1px solid #d3d1d1;
+    border: 1px solid #e5e7eb;
     border-radius: 8px;
     margin-bottom: 0.75rem;
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+    transition: transform 0.2s;
+}
+.done-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 }
 .item-text {
     flex-grow: 1;
@@ -103,11 +152,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-
 }
 .remove-btn:hover {
     background-color: #f3f4f6;
-    color: red;
+    color: #ef4444;
 }
 #emptyState {
     text-align: center;
@@ -115,6 +163,23 @@ body {
     color: #6b7280;
 }
 .hidden {
-    display:none;
+    display:none !important;
 }
-
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(150%);
+    background-color: #1f2937;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: transform 0.5s ease-in-out;
+    z-index: 1000;
+    opacity: 0;
+}
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
