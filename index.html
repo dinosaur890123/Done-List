@@ -27,6 +27,9 @@
                 <input type="text" id="taskInput" placeholder="I finished my math homework...">
                 <button id="addButton">Add</button>
             </div>
+            <div class="help-container">
+                <button id="helpButton">I don't know what to do</button>
+            </div>
         </header>
         <main class="main-scroll-area">
             <div class="main-content">
@@ -38,7 +41,18 @@
         </main>
     </div>
 
-    <div id="toastNotification" class="toast hidden"></div>
+    <div id="toastNotification" class="toast hidden" aria-live="polite"></div>
+
+    <div id="suggestionModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>No clue what to do???</h2>
+            <p id="suggestionText"></p>
+            <div class="modal-buttons">
+                <button id="useSuggestionButton">Yeah, I'll do this</button>
+                <button id="closeModalButton">Nah screw this</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const quoteContainer = document.getElementById('quoteContainer');
@@ -51,6 +65,11 @@
         const streakCountEl = document.getElementById('streakCount');
         const achievementsContainer = document.getElementById('achievementsContainer');
         const toastNotification = document.getElementById('toastNotification');
+        const helpButton = document.getElementById('helpButton');
+        const suggestionModal = document.getElementById('suggestionModal');
+        const suggestionText = document.getElementById('suggestionText');
+        const useSuggestionButton = document.getElementById('useSuggestionButton');
+        const closeModalButton = document.getElementById('closeModalButton');
 
         const quotes = [
             "The secret of getting ahead is getting started.",
@@ -67,7 +86,21 @@
             three_day_streak: { name: "On a Roll!", icon: "📈", description: "You have a 3-day streak!", condition: (items, streak) => streak.count >= 3 },
             seven_day_streak: { name: "On Fire!", icon: "🔥", description: "You have a 7-day streak!", condition: (items, streak) => streak.count >= 7 },
         };
-        
+        const suggestions = [
+            "Make notes on what you learned from a subject in the past week",
+            "Organise your desk",
+            "Do your homework",
+            "Find a youtube video about what you are studying right now",
+            "Read 5 chapters of a book",
+            "Spend 15 minutes reviewing math",
+            "Drink a glass of water",
+            "Pack your bag for tomorrow",
+            "Avoid playing games for a whole day...",
+            "Check your email",
+            "Review what you have learnt today",
+            "Go to sleep early today",
+        ];
+
         let items = JSON.parse(localStorage.getItem('doneItems')) || [];
         let streakData = JSON.parse(localStorage.getItem('streakData')) || { count: 0, lastDate: null };
         let unlockedAchievements = JSON.parse(localStorage.getItem('unlockedAchievements')) || [];
@@ -111,17 +144,18 @@
 
         function renderTotalTasks() {
             const total = items.length;
-            totalTasks.textContent = total === 1 ? 'You have completed 1 task overall. Keep it up!' : `You have completed ${total} tasks overall. Great work!`;
+            totalTasks.textContent = total === 1 ? 'You have completed 1 task overall. you better not be procrastinating' : `You have completed ${total} tasks in total. Keep going...`;
         }
-        
+
         function renderWeeklySummary() {
             const today = new Date();
-            const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)));
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
             startOfWeek.setHours(0, 0, 0, 0);
             const weeklyCount = items.filter(item => new Date(item.date) >= startOfWeek).length;
             weeklySummary.textContent = `You have completed ${weeklyCount} items this week.`;
         }
-        
+
         function updateStreak() {
             const today = new Date();
             const todayStr = today.toDateString();
@@ -154,7 +188,7 @@
                     const achievement = achievements[id];
                     if (achievement.condition(items, streakData)) {
                         unlockedAchievements.push(id);
-                        showToast(`🏆 Achievement Unlocked: ${achievement.name}`);
+                        showToast(`Achievement Unlocked: ${achievement.name}`);
                     }
                 }
             }
@@ -185,6 +219,19 @@
                 updateUI();
             }
         }
+        function showSuggestion() {
+            const randomIndex = Math.floor(Math.random() * suggestions.length);
+            suggestionText.textContent = suggestions[randomIndex];
+            suggestionModal.classList.remove('hidden')
+        }
+        function hideSuggestion() {
+            suggestionModal.classList.add('hidden');
+        }
+        function useSuggestion() {
+            taskInput.value = suggestionText.textContent;
+            hideSuggestion();
+            taskInput.focus();
+        }
 
         function removeItem(indexToRemove) {
             items.splice(indexToRemove, 1);
@@ -199,6 +246,14 @@
             if (removeButton) {
                 const itemElement = removeButton.closest('.done-item');
                 removeItem(parseInt(itemElement.dataset.index, 10));
+            }
+        });
+        helpButton.addEventListener('click', showSuggestion);
+        closeModalButton.addEventListener('click', hideSuggestion);
+        useSuggestionButton.addEventListener('click', useSuggestion);
+        suggestionModal.addEventListener('click', (e) => {
+            if (e.target === suggestionModal) {
+                hideSuggestion();
             }
         });
 
